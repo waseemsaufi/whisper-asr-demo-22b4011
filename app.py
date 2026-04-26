@@ -34,7 +34,7 @@ def preprocess_audio(audio_path, speed_factor=1.0):
     - Noise reduction
     - Normalization
     """
-    y, sr = librosa.load(audio_path, sr=16000, backend="soundfile")
+    y, sr = librosa.load(audio_path, sr=16000)
 
     # --- Speed control ---
     if speed_factor != 1.0:
