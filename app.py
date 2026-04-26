@@ -8,7 +8,7 @@ from transformers import WhisperForConditionalGeneration, WhisperProcessor
 # --------------------
 # Load model
 # --------------------
-model_path = "whisper-brunei-final"
+model_path = "seemswas/whisper-brunei-asr"
 
 processor = WhisperProcessor.from_pretrained(model_path)
 model = WhisperForConditionalGeneration.from_pretrained(model_path)
