@@ -17,6 +17,8 @@ model = WhisperForConditionalGeneration.from_pretrained(model_path)
 
 model.config.forced_decoder_ids = None
 model.config.suppress_tokens = []
+model.generation_config.language = None
+model.generation_config.task = "transcribe"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
@@ -87,7 +89,12 @@ def transcribe(path):
     ).input_features.to(device)
 
     with torch.no_grad():
-        predicted_ids = model.generate(inputs)
+        predicted_ids = model.generate(
+            inputs,
+            task="transcribe",
+            language="auto",   # 🔥 important fix
+            return_timestamps=False
+        )
 
     return processor.batch_decode(
         predicted_ids,
