@@ -81,22 +81,36 @@ def preprocess_audio(audio_path, speed_factor=1.0):
 def transcribe(path):
     audio, sr = librosa.load(path, sr=16000)
 
-    inputs = processor(
-        audio,
-        sampling_rate=16000,
-        return_tensors="pt"
-    ).input_features.to(device)
+    chunk_length = 30 * sr   # 30 seconds
+    chunks = []
 
-    with torch.no_grad():
-        predicted_ids = model.generate(
-            inputs,
-            task="transcribe"   
-        )
+    # Split audio into chunks
+    for i in range(0, len(audio), chunk_length):
+        chunks.append(audio[i:i + chunk_length])
 
-    return processor.batch_decode(
-        predicted_ids,
-        skip_special_tokens=True
-    )[0]
+    full_text = []
+
+    for chunk in chunks:
+        inputs = processor(
+            chunk,
+            sampling_rate=16000,
+            return_tensors="pt"
+        ).input_features.to(device)
+
+        with torch.no_grad():
+            predicted_ids = model.generate(
+                inputs,
+                task="transcribe"
+            )
+
+        text = processor.batch_decode(
+            predicted_ids,
+            skip_special_tokens=True
+        )[0]
+
+        full_text.append(text)
+
+    return " ".join(full_text)
 
 # --------------------
 # UI
