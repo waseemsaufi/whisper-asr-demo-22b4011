@@ -12,6 +12,7 @@ model_path = "seemswas/whisper-brunei-asr"
 
 processor = WhisperProcessor.from_pretrained(model_path)
 model = WhisperForConditionalGeneration.from_pretrained(model_path)
+model.config.forced_decoder_ids = None
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
@@ -32,12 +33,23 @@ def preprocess_audio(audio_path):
 def transcribe(path):
     audio, sr = librosa.load(path, sr=16000)
 
-    inputs = processor(audio, sampling_rate=16000, return_tensors="pt").input_features.to(device)
+    inputs = processor(
+        audio,
+        sampling_rate=16000,
+        return_tensors="pt"
+    ).input_features.to(device)
 
     with torch.no_grad():
-        predicted_ids = model.generate(inputs)
+        predicted_ids = model.generate(
+            inputs,
+            task="transcribe",   
+            language=None       
+        )
 
-    return processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
+    return processor.batch_decode(
+        predicted_ids,
+        skip_special_tokens=True
+    )[0]
 
 # --------------------
 # UI
